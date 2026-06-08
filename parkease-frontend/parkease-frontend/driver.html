@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Driver Dashboard — ParkEase</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🅿️</div>
+    <div class="sb-logo-text">Park<span>Ease</span></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">MAIN</div>
+    <button class="sb-item active" data-page="home"><span class="sb-icon">⊞</span><span class="sb-label">Dashboard</span></button>
+    <button class="sb-item" data-page="search"><span class="sb-icon">🔍</span><span class="sb-label">Find Parking</span></button>
+    <button class="sb-item" data-page="bookings"><span class="sb-icon">📅</span><span class="sb-label">My Bookings</span><span class="sb-badge" id="active-count">0</span></button>
+    <div class="sb-section">ACCOUNT</div>
+    <button class="sb-item" data-page="profile"><span class="sb-icon">👤</span><span class="sb-label">Profile</span></button>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-user" id="sb-user-btn">
+      <div class="sb-avatar" id="sb-avatar">JD</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name" id="sb-user-name">Loading...</div>
+        <div class="sb-user-role" id="sb-user-role">driver</div>
+      </div>
+    </div>
+    <button onclick="Auth.logout()" style="width:100%;margin-top:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px;color:var(--r2);cursor:pointer;font-size:12px">Sign Out</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="topbar">
+    <button class="icon-btn" id="sb-toggle">☰</button>
+    <div style="flex:1">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-bc">ParkEase <span id="bc-page">/ Dashboard</span></div>
+    </div>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+    <div class="sb-avatar" style="cursor:pointer" id="topbar-avatar">JD</div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="page-header">
+        <h1 id="welcome-msg">Good morning 👋</h1>
+        <p>Here's your parking overview</p>
+      </div>
+
+      <div class="g4" style="margin-bottom:18px" id="kpi-row">
+        <div class="kpi-card"><div class="kpi-glow" style="background:#3b82f6"></div><div class="kpi-lbl">Total Bookings</div><div class="kpi-val neu" id="k-total">—</div><div class="kpi-foot">All time</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#10b981"></div><div class="kpi-lbl">Active Now</div><div class="kpi-val" style="color:var(--g2)" id="k-active">—</div><div class="kpi-foot">Ongoing parking</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#f59e0b"></div><div class="kpi-lbl">Total Spent</div><div class="kpi-val" style="color:var(--a2)" id="k-spent">—</div><div class="kpi-foot">Completed bookings</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#8b5cf6"></div><div class="kpi-lbl">Upcoming</div><div class="kpi-val" style="color:#a78bfa" id="k-pending">—</div><div class="kpi-foot">Pending bookings</div></div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="g2" style="margin-bottom:18px">
+        <div class="card" style="display:flex;align-items:center;gap:16px;cursor:pointer" onclick="switchPage('search')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🔍</div>
+          <div><div style="font-size:15px;font-weight:600;margin-bottom:3px">Find Parking</div><div style="font-size:12px;color:var(--text3)">Search available spots near you</div></div>
+          <div style="margin-left:auto;color:var(--blue2);font-size:20px">→</div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:16px;cursor:pointer" onclick="switchPage('bookings')">
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📅</div>
+          <div><div style="font-size:15px;font-weight:600;margin-bottom:3px">My Bookings</div><div style="font-size:12px;color:var(--text3)">View and manage your bookings</div></div>
+          <div style="margin-left:auto;color:var(--g2);font-size:20px">→</div>
+        </div>
+      </div>
+
+      <!-- Recent Bookings -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:14px;font-weight:600">Recent Bookings</div>
+          <button class="btn btn-outline btn-sm" onclick="switchPage('bookings')">View All →</button>
+        </div>
+        <div id="recent-bookings-list"><div class="loader"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- SEARCH PAGE -->
+    <div class="page" id="page-search">
+      <div class="page-header-row">
+        <div class="page-header" style="margin:0"><h1>Find Parking</h1><p>Search available spots near you</p></div>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-wrap" style="flex:2">
+          <input class="form-input" id="search-q" placeholder="Search by area or address…" oninput="searchSpots()">
+        </div>
+        <input class="form-input" id="search-city" placeholder="City" style="width:140px" oninput="searchSpots()">
+        <input type="number" class="form-input" id="search-min" placeholder="Min ₹/hr" style="width:110px" oninput="searchSpots()">
+        <input type="number" class="form-input" id="search-max" placeholder="Max ₹/hr" style="width:110px" oninput="searchSpots()">
+        <button class="btn btn-primary" onclick="loadSpots()">🔍 Search</button>
+      </div>
+
+      <div id="spots-count" style="font-size:12px;color:var(--text3);margin-bottom:12px"></div>
+      <div id="spots-grid" class="g3"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- BOOKINGS PAGE -->
+    <div class="page" id="page-bookings">
+      <div class="page-header-row">
+        <div class="page-header" style="margin:0"><h1>My Bookings</h1><p>Manage all your parking bookings</p></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" data-filter="" onclick="filterBookings(this,'')">All</button>
+        <button class="btn btn-outline btn-sm" data-filter="active" onclick="filterBookings(this,'active')">🟢 Active</button>
+        <button class="btn btn-outline btn-sm" data-filter="pending" onclick="filterBookings(this,'pending')">🟡 Pending</button>
+        <button class="btn btn-outline btn-sm" data-filter="completed" onclick="filterBookings(this,'completed')">✅ Completed</button>
+        <button class="btn btn-outline btn-sm" data-filter="cancelled" onclick="filterBookings(this,'cancelled')">❌ Cancelled</button>
+      </div>
+
+      <div id="bookings-list"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="page-profile">
+      <div class="page-header"><h1>My Profile</h1><p>Manage your account settings</p></div>
+      <div class="g2">
+        <div class="card">
+          <div style="font-size:14px;font-weight:600;margin-bottom:16px">Personal Info</div>
+          <div class="alert alert-error" id="profile-alert" style="display:none"></div>
+          <div class="alert alert-success" id="profile-success" style="display:none"></div>
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="p-name" placeholder="Your name"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="p-email" disabled style="opacity:.6"></div>
+          <div class="form-group"><label class="form-label">Role</label><input class="form-input" id="p-role" disabled style="opacity:.6;text-transform:capitalize"></div>
+          <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+        </div>
+        <div class="card">
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px">Account Info</div>
+          <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:16px;margin-bottom:14px">
+            <div style="font-size:28px;text-align:center;margin-bottom:8px">🚗</div>
+            <div style="text-align:center;font-size:15px;font-weight:700" id="acc-name">—</div>
+            <div style="text-align:center;font-size:12px;color:var(--text3)">Driver Account</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Member since</span><span id="acc-since">—</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Total bookings</span><span id="acc-bookings">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- BOOK MODAL -->
+<div class="modal-overlay" id="book-modal" style="display:none" onclick="if(event.target===this)closeBookModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📅 Book Parking Spot</div>
+      <button class="modal-close" onclick="closeBookModal()">✕</button>
+    </div>
+    <div class="alert alert-error" id="book-alert" style="display:none"></div>
+    <div id="book-spot-info" style="background:var(--card2);border-radius:10px;padding:14px;margin-bottom:16px"></div>
+    <div class="form-group"><label class="form-label">Vehicle Number</label><input class="form-input" id="b-vehicle" placeholder="e.g. MP09 AB 1234"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Start Date & Time</label><input type="datetime-local" class="form-input" id="b-start"></div>
+      <div class="form-group"><label class="form-label">End Date & Time</label><input type="datetime-local" class="form-input" id="b-end"></div>
+    </div>
+    <div id="b-calc" style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:12px;font-size:13px;margin-bottom:4px;display:none"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeBookModal()">Cancel</button>
+      <button class="btn btn-primary" id="book-confirm-btn" onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTEND MODAL -->
+<div class="modal-overlay" id="extend-modal" style="display:none" onclick="if(event.target===this)document.getElementById('extend-modal').style.display='none'">
+  <div class="modal" style="width:380px">
+    <div class="modal-header"><div class="modal-title">⏰ Extend Booking</div><button class="modal-close" onclick="document.getElementById('extend-modal').style.display='none'">✕</button></div>
+    <div class="form-group"><label class="form-label">Extra Hours</label><input type="number" class="form-input" id="ext-hours" placeholder="2" min="1" max="12" value="1"></div>
+    <div id="ext-calc" style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:8px;padding:12px;font-size:13px;margin-bottom:4px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('extend-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmExtend()">Extend Booking</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+// ── INIT ──
+initTheme();
+const tBtn = document.getElementById('theme-btn');
+if(tBtn) tBtn.textContent = (localStorage.getItem('pe_theme')||'dark')==='dark'?'☀️':'🌙';
+if(!Auth.requireAuth()) { } else { init(); }
+
+let allBookings = [], allSpots = [], activeSpotId = null, activeBookingId = null;
+
+async function init() {
+  fillUserInfo();
+  initSidebarCollapse();
+  initSidebarNav('home');
+  setWelcome();
+  await loadDashboard();
+  await loadSpots();
+  await loadBookings();
+  await loadProfile();
+  document.querySelector('.sb-item[data-page="search"]').addEventListener('click', () => loadSpots());
+  document.querySelector('.sb-item[data-page="bookings"]').addEventListener('click', () => loadBookings());
+}
+
+function setWelcome() {
+  const user = Auth.getUser();
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  const el = document.getElementById('welcome-msg');
+  if(el) el.textContent = `Good ${greet}, ${user?.name?.split(' ')[0] || 'Driver'} 👋`;
+}
+
+function switchPage(page) {
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.toggle('active', i.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-'+page);
+  if(el) el.classList.add('active');
+  const titles = {home:'Dashboard',search:'Find Parking',bookings:'My Bookings',profile:'Profile'};
+  document.getElementById('page-title').textContent = titles[page]||page;
+  document.getElementById('bc-page').textContent = '/ '+(titles[page]||page);
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  try {
+    const res = await API.bookings.myBookings();
+    allBookings = res.bookings || [];
+    const total   = allBookings.length;
+    const active  = allBookings.filter(b=>b.status==='active').length;
+    const pending = allBookings.filter(b=>b.status==='pending').length;
+    const spent   = allBookings.filter(b=>b.status==='completed').reduce((s,b)=>s+parseFloat(b.total_amount||0),0);
+    document.getElementById('k-total').textContent   = total;
+    document.getElementById('k-active').textContent  = active;
+    document.getElementById('k-pending').textContent = pending;
+    document.getElementById('k-spent').textContent   = '₹'+Math.round(spent).toLocaleString();
+    document.getElementById('active-count').textContent = active || '';
+    renderRecentBookings(allBookings.slice(0,5));
+  } catch(e) { console.error(e); }
+}
+
+function renderRecentBookings(bookings) {
+  const el = document.getElementById('recent-bookings-list');
+  if(!bookings.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><h3>No bookings yet</h3><p>Find a parking spot to make your first booking</p></div>`; return; }
+  el.innerHTML = bookings.map(b=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(51,65,85,.4)">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🅿️</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.spot_title}</div>
+        <div style="font-size:11px;color:var(--text3)">${b.address} · ${formatDateTime(b.start_time)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:13px;font-weight:600">₹${parseFloat(b.total_amount||0).toFixed(0)}</div>
+        ${statusBadge(b.status)}
+      </div>
+    </div>`).join('');
+}
+
+// ── SPOTS ──
+async function loadSpots() {
+  showLoader('spots-grid');
+  try {
+    const city   = document.getElementById('search-city')?.value||'';
+    const minP   = document.getElementById('search-min')?.value||'';
+    const maxP   = document.getElementById('search-max')?.value||'';
+    const search = document.getElementById('search-q')?.value||'';
+    let q = '?';
+    if(city)   q+=`city=${encodeURIComponent(city)}&`;
+    if(minP)   q+=`minPrice=${minP}&`;
+    if(maxP)   q+=`maxPrice=${maxP}&`;
+    if(search) q+=`search=${encodeURIComponent(search)}&`;
+    const res = await API.spots.getAll(q);
+    allSpots = res.spots || [];
+    renderSpots(allSpots);
+    const cnt = document.getElementById('spots-count');
+    if(cnt) cnt.textContent = `${allSpots.length} spot${allSpots.length!==1?'s':''} found`;
+  } catch(e) { showEmpty('spots-grid','😞','Error loading spots','Please check your connection and try again'); }
+}
+
+function searchSpots() { clearTimeout(window.searchTimer); window.searchTimer=setTimeout(loadSpots,400); }
+
+function renderSpots(spots) {
+  const el = document.getElementById('spots-grid');
+  if(!spots.length) { el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><h3>No spots found</h3><p>Try adjusting your search filters</p></div>`; return; }
+  el.innerHTML = spots.map(s=>`
+    <div class="spot-card" onclick="openBookModal(${s.id})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div style="font-size:16px;font-weight:700;line-height:1.3;flex:1">${s.title}</div>
+        <span class="spot-slots ${s.available_slots>0?'available':'full'}">${s.available_slots>0?s.available_slots+' free':'Full'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">📍 ${s.address}, ${s.city}</div>
+      ${s.avg_rating?`<div style="font-size:12px;color:var(--a2);margin-bottom:10px">⭐ ${parseFloat(s.avg_rating).toFixed(1)} (${s.total_reviews} reviews)</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <div><span class="spot-price">₹${s.price_per_hour}</span><span style="font-size:11px;color:var(--text3)">/hour</span></div>
+        <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openBookModal(${s.id})" ${s.available_slots<=0?'disabled':''}>
+          ${s.available_slots>0?'Book Now':'No Slots'}
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">Owner: ${s.owner_name}</div>
+    </div>`).join('');
+}
+
+// ── BOOK MODAL ──
+function openBookModal(spotId) {
+  const spot = allSpots.find(s=>s.id===spotId);
+  if(!spot) return;
+  activeSpotId = spotId;
+  document.getElementById('book-spot-info').innerHTML=`
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">${spot.title}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:4px">📍 ${spot.address}, ${spot.city}</div>
+    <div style="font-size:13px;font-weight:600;color:var(--blue2)">₹${spot.price_per_hour}/hour</div>`;
+  // Set default times (now to +2 hours)
+  const now = new Date(); now.setSeconds(0,0);
+  const end = new Date(now.getTime()+2*3600000);
+  const fmt = d => d.toISOString().slice(0,16);
+  document.getElementById('b-start').value = fmt(now);
+  document.getElementById('b-end').value   = fmt(end);
+  updateBookCalc(spot.price_per_hour);
+  document.getElementById('b-start').addEventListener('change',()=>updateBookCalc(spot.price_per_hour));
+  document.getElementById('b-end').addEventListener('change',()=>updateBookCalc(spot.price_per_hour));
+  hideAlert('book-alert');
+  document.getElementById('book-modal').style.display='flex';
+}
+
+function updateBookCalc(pricePerHour) {
+  const start  = new Date(document.getElementById('b-start').value);
+  const end    = new Date(document.getElementById('b-end').value);
+  const calc   = document.getElementById('b-calc');
+  if(isNaN(start)||isNaN(end)||end<=start) { calc.style.display='none'; return; }
+  const hours  = Math.ceil((end-start)/3600000);
+  const total  = hours*parseFloat(pricePerHour);
+  calc.style.display = 'block';
+  calc.innerHTML = `<div style="display:flex;justify-content:space-between"><span>Duration</span><span>${hours} hour${hours!==1?'s':''}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;color:var(--blue2);margin-top:6px"><span>Total Amount</span><span>₹${total.toFixed(0)}</span></div>`;
+}
+
+function closeBookModal() { document.getElementById('book-modal').style.display='none'; activeSpotId=null; }
+
+async function confirmBooking() {
+  const vehicle   = document.getElementById('b-vehicle').value.trim();
+  const startTime = document.getElementById('b-start').value;
+  const endTime   = document.getElementById('b-end').value;
+  const btn       = document.getElementById('book-confirm-btn');
+  if(!startTime||!endTime) { showAlert('Please select start and end time','error','book-alert'); return; }
+  if(new Date(endTime)<=new Date(startTime)) { showAlert('End time must be after start time','error','book-alert'); return; }
+  btn.textContent='Booking...'; btn.disabled=true;
+  try {
+    await API.bookings.create({ spot_id:activeSpotId, start_time:startTime, end_time:endTime, vehicle_number:vehicle });
+    closeBookModal();
+    showToast('🎉 Booking confirmed!','success');
+    await loadDashboard(); await loadBookings();
+  } catch(e) {
+    showAlert(e.message||'Booking failed','error','book-alert');
+    btn.textContent='Confirm Booking'; btn.disabled=false;
+  }
+}
+
+// ── BOOKINGS ──
+let currentFilter = '';
+async function loadBookings() {
+  showLoader('bookings-list');
+  try {
+    const res = await API.bookings.myBookings();
+    allBookings = res.bookings||[];
+    renderBookings(allBookings, currentFilter);
+  } catch(e) { showEmpty('bookings-list','😞','Error loading bookings','Please try again'); }
+}
+
+function filterBookings(btn, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('btn-primary',b.dataset.filter===filter));
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('btn-outline',b.dataset.filter!==filter));
+  renderBookings(allBookings, filter);
+}
+
+function renderBookings(bookings, filter='') {
+  const el   = document.getElementById('bookings-list');
+  const data = filter ? bookings.filter(b=>b.status===filter) : bookings;
+  if(!data.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><h3>No bookings found</h3><p>${filter?'No '+filter+' bookings':'You have not made any bookings yet'}</p></div>`; return; }
+  el.innerHTML = data.map(b=>`
+    <div class="booking-card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:3px">${b.spot_title}</div>
+          <div style="font-size:12px;color:var(--text3)">📍 ${b.address||''}, ${b.city||''}</div>
+        </div>
+        ${statusBadge(b.status)}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:12px;margin-bottom:12px">
+        <div><div style="color:var(--text3)">Start</div><div style="font-weight:500">${formatDateTime(b.start_time)}</div></div>
+        <div><div style="color:var(--text3)">End</div><div style="font-weight:500">${formatDateTime(b.end_time)}</div></div>
+        <div><div style="color:var(--text3)">Amount</div><div style="font-weight:700;color:var(--blue2)">₹${parseFloat(b.total_amount||0).toFixed(0)}</div></div>
+      </div>
+      ${b.vehicle_number?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px">🚗 ${b.vehicle_number}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${b.status==='active'?`<button class="btn btn-success btn-sm" onclick="openExtend(${b.id},${b.spot_id})">⏰ Extend</button>`:''}
+        ${b.status==='active'||b.status==='pending'?`<button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>`:''}
+        ${b.status==='active'&&b.spot_id?`<button class="btn btn-outline btn-sm" onclick="showToast('🗺 Navigation opening...','info')">🗺 Navigate</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function cancelBooking(id) {
+  if(!confirm('Cancel this booking?')) return;
+  try {
+    await API.bookings.updateStatus(id,'cancelled');
+    showToast('Booking cancelled','info');
+    await loadDashboard(); await loadBookings();
+  } catch(e) { showToast(e.message||'Failed to cancel','error'); }
+}
+
+// ── EXTEND ──
+let extBookingId=null, extPricePerHour=0;
+function openExtend(bookingId, spotId) {
+  extBookingId = bookingId;
+  const spot = allSpots.find(s=>s.id===spotId);
+  extPricePerHour = spot?.price_per_hour||0;
+  const hours = parseInt(document.getElementById('ext-hours').value)||1;
+  document.getElementById('ext-calc').innerHTML = `Extra ${hours}h × ₹${extPricePerHour} = <b style="color:var(--blue2)">₹${hours*extPricePerHour}</b>`;
+  document.getElementById('extend-modal').style.display='flex';
+}
+document.getElementById && document.addEventListener('DOMContentLoaded', () => {
+  const hInp = document.getElementById('ext-hours');
+  if(hInp) hInp.addEventListener('input', () => {
+    const h=parseInt(hInp.value)||1;
+    document.getElementById('ext-calc').innerHTML=`Extra ${h}h × ₹${extPricePerHour} = <b style="color:var(--blue2)">₹${h*extPricePerHour}</b>`;
+  });
+});
+
+async function confirmExtend() {
+  const hours = parseInt(document.getElementById('ext-hours').value)||1;
+  try {
+    await API.bookings.extend(extBookingId, hours);
+    document.getElementById('extend-modal').style.display='none';
+    showToast(`Booking extended by ${hours} hour(s)! ✅`,'success');
+    await loadDashboard(); await loadBookings();
+  } catch(e) { showToast(e.message||'Extension failed','error'); }
+}
+
+// ── PROFILE ──
+async function loadProfile() {
+  try {
+    const res = await API.auth.me();
+    const u = res.user;
+    document.getElementById('p-name').value = u.name||'';
+    document.getElementById('p-email').value= u.email||'';
+    document.getElementById('p-role').value = u.role||'driver';
+    document.getElementById('acc-name').textContent  = u.name||'';
+    document.getElementById('acc-since').textContent = formatDate(u.created_at);
+  } catch {}
+}
+
+async function saveProfile() {
+  const name = document.getElementById('p-name').value.trim();
+  if(!name) { showAlert('Name cannot be empty','error','profile-alert'); return; }
+  try {
+    await API.auth.update({ name });
+    const user = Auth.getUser(); user.name=name; Auth.login(Auth.getToken(),user);
+    fillUserInfo();
+    document.getElementById('profile-alert').style.display='none';
+    showAlert('Profile updated successfully!','success','profile-success');
+    showToast('Profile saved ✅','success');
+  } catch(e) { showAlert(e.message||'Failed to save','error','profile-alert'); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Owner Dashboard — ParkEase</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app-layout">
+<div class="sidebar" id="sidebar">
+  <div class="sb-logo"><div class="sb-logo-icon">🅿️</div><div class="sb-logo-text">Park<span>Ease</span></div></div>
+  <div class="sb-nav">
+    <div class="sb-section">MAIN</div>
+    <button class="sb-item active" data-page="home"><span class="sb-icon">⊞</span><span class="sb-label">Dashboard</span></button>
+    <button class="sb-item" data-page="spots"><span class="sb-icon">🏢</span><span class="sb-label">My Spots</span></button>
+    <button class="sb-item" data-page="bookings"><span class="sb-icon">📅</span><span class="sb-label">Bookings</span><span class="sb-badge" id="new-bookings-count"></span></button>
+    <button class="sb-item" data-page="earnings"><span class="sb-icon">💰</span><span class="sb-label">Earnings</span></button>
+    <div class="sb-section">ACCOUNT</div>
+    <button class="sb-item" data-page="profile"><span class="sb-icon">👤</span><span class="sb-label">Profile</span></button>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-user"><div class="sb-avatar" id="sb-avatar">OW</div><div class="sb-user-info"><div class="sb-user-name" id="sb-user-name">Owner</div><div class="sb-user-role">Owner</div></div></div>
+    <button onclick="Auth.logout()" style="width:100%;margin-top:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px;color:var(--r2);cursor:pointer;font-size:12px">Sign Out</button>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <button class="icon-btn" id="sb-toggle">☰</button>
+    <div style="flex:1"><div class="topbar-title" id="page-title">Dashboard</div><div class="topbar-bc">ParkEase <span id="bc-page">/ Dashboard</span></div></div>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+    <div class="sb-avatar" style="cursor:pointer" id="topbar-avatar">OW</div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="page-header"><h1 id="welcome-msg">Good morning, Owner 👋</h1><p>Here's your property performance</p></div>
+      <div class="g4" style="margin-bottom:18px">
+        <div class="kpi-card"><div class="kpi-glow" style="background:#10b981"></div><div class="kpi-lbl">Total Earnings</div><div class="kpi-val" style="color:var(--g2)" id="k-earn">₹0</div><div class="kpi-foot">Completed bookings</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#3b82f6"></div><div class="kpi-lbl">Active Bookings</div><div class="kpi-val neu" id="k-active">0</div><div class="kpi-foot">Right now</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#f59e0b"></div><div class="kpi-lbl">My Spots</div><div class="kpi-val" style="color:var(--a2)" id="k-spots">0</div><div class="kpi-foot">Listed spots</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#8b5cf6"></div><div class="kpi-lbl">Total Bookings</div><div class="kpi-val" style="color:#a78bfa" id="k-total">0</div><div class="kpi-foot">All time</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:18px">
+        <div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="switchPage('spots')">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏢</div>
+          <div><div style="font-size:14px;font-weight:600">Manage Spots</div><div style="font-size:12px;color:var(--text3)">Add, edit or remove parking spots</div></div>
+          <div style="margin-left:auto;color:var(--blue2);font-size:20px">→</div>
+        </div>
+        <div class="card" style="cursor:pointer;display:flex;align-items:center;gap:14px" onclick="switchPage('bookings')">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📅</div>
+          <div><div style="font-size:14px;font-weight:600">View Bookings</div><div style="font-size:12px;color:var(--text3)">See who's booking your spots</div></div>
+          <div style="margin-left:auto;color:var(--g2);font-size:20px">→</div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:14px;font-weight:600">Recent Bookings</div><button class="btn btn-outline btn-sm" onclick="switchPage('bookings')">View All →</button></div>
+        <div id="recent-bk-list"><div class="loader"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- SPOTS -->
+    <div class="page" id="page-spots">
+      <div class="page-header-row">
+        <div class="page-header" style="margin:0"><h1>My Parking Spots</h1><p>Manage your listed properties</p></div>
+        <button class="btn btn-primary" onclick="openSpotModal()">+ Add Spot</button>
+      </div>
+      <div id="spots-list"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- BOOKINGS -->
+    <div class="page" id="page-bookings">
+      <div class="page-header"><h1>Bookings for My Spots</h1><p>Track all driver bookings</p></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" data-filter="" onclick="filterOBk(this,'')">All</button>
+        <button class="btn btn-outline btn-sm" data-filter="active" onclick="filterOBk(this,'active')">🟢 Active</button>
+        <button class="btn btn-outline btn-sm" data-filter="pending" onclick="filterOBk(this,'pending')">🟡 Pending</button>
+        <button class="btn btn-outline btn-sm" data-filter="completed" onclick="filterOBk(this,'completed')">✅ Completed</button>
+      </div>
+      <div id="owner-bk-list"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- EARNINGS -->
+    <div class="page" id="page-earnings">
+      <div class="page-header"><h1>Earnings</h1><p>Your income from parking spots</p></div>
+      <div class="g3" style="margin-bottom:18px">
+        <div class="kpi-card"><div class="kpi-glow" style="background:#10b981"></div><div class="kpi-lbl">Total Earned</div><div class="kpi-val" style="color:var(--g2)" id="earn-total">₹0</div><div class="kpi-foot">All completed</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#3b82f6"></div><div class="kpi-lbl">This Month</div><div class="kpi-val neu" id="earn-month">₹0</div><div class="kpi-foot">Current month</div></div>
+        <div class="kpi-card"><div class="kpi-glow" style="background:#f59e0b"></div><div class="kpi-lbl">Avg per Booking</div><div class="kpi-val" style="color:var(--a2)" id="earn-avg">₹0</div><div class="kpi-foot">Completed bookings</div></div>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:14px">Earnings by Spot</div>
+        <div id="earn-table"><div class="loader"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="page-header"><h1>Profile</h1><p>Manage your owner account</p></div>
+      <div class="card" style="max-width:480px">
+        <div class="alert alert-success" id="profile-ok" style="display:none"></div>
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="p-name"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="p-email" disabled style="opacity:.6"></div>
+        <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- SPOT MODAL -->
+<div class="modal-overlay" id="spot-modal" style="display:none" onclick="if(event.target===this)closeSpotModal()">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="spot-modal-title">🏢 Add Parking Spot</div><button class="modal-close" onclick="closeSpotModal()">✕</button></div>
+    <div class="alert alert-error" id="spot-alert" style="display:none"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Spot Title *</label><input class="form-input" id="s-title" placeholder="e.g. Central Mall Parking"></div>
+      <div class="form-group"><label class="form-label">City *</label><input class="form-input" id="s-city" placeholder="Indore"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Full Address *</label><input class="form-input" id="s-address" placeholder="Street, Area, City"></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="s-desc" rows="2" placeholder="Describe your spot…"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price per Hour (₹) *</label><input type="number" class="form-input" id="s-price" placeholder="30"></div>
+      <div class="form-group"><label class="form-label">Total Slots *</label><input type="number" class="form-input" id="s-slots" placeholder="1" min="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeSpotModal()">Cancel</button>
+      <button class="btn btn-primary" id="spot-save-btn" onclick="saveSpot()">Save Spot</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+initTheme();
+const tBtn=document.getElementById('theme-btn');
+if(tBtn) tBtn.textContent=(localStorage.getItem('pe_theme')||'dark')==='dark'?'☀️':'🌙';
+if(!Auth.requireAuth()){}else{init();}
+
+let allSpots=[],allBk=[],editSpotId=null,currentBkFilter='';
+
+async function init(){
+  fillUserInfo();
+  initSidebarCollapse();
+  initSidebarNav('home');
+  setWelcome();
+  await Promise.all([loadDashboard(),loadSpots(),loadOwnerBookings()]);
+  await loadProfile();
+  await loadEarnings();
+}
+
+function switchPage(pg){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.toggle('active',i.dataset.page===pg));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+pg);if(el)el.classList.add('active');
+  const titles={home:'Dashboard',spots:'My Spots',bookings:'Bookings',earnings:'Earnings',profile:'Profile'};
+  document.getElementById('page-title').textContent=titles[pg]||pg;
+  document.getElementById('bc-page').textContent='/'+(titles[pg]||pg);
+}
+
+function setWelcome(){
+  const u=Auth.getUser();const h=new Date().getHours();
+  const g=h<12?'morning':h<17?'afternoon':'evening';
+  const el=document.getElementById('welcome-msg');
+  if(el)el.textContent=`Good ${g}, ${u?.name?.split(' ')[0]||'Owner'} 👋`;
+}
+
+async function loadDashboard(){
+  try{
+    const[sRes,bRes]=await Promise.all([API.spots.mySpots(),API.bookings.spotBookings()]);
+    allSpots=sRes.spots||[];allBk=bRes.bookings||[];
+    const earn=allBk.filter(b=>b.status==='completed').reduce((s,b)=>s+parseFloat(b.total_amount||0),0);
+    const active=allBk.filter(b=>b.status==='active').length;
+    const pending=allBk.filter(b=>b.status==='pending').length;
+    document.getElementById('k-earn').textContent='₹'+Math.round(earn).toLocaleString();
+    document.getElementById('k-active').textContent=active;
+    document.getElementById('k-spots').textContent=allSpots.length;
+    document.getElementById('k-total').textContent=allBk.length;
+    const nb=document.getElementById('new-bookings-count');
+    if(nb)nb.textContent=pending||'';
+    renderRecentBk(allBk.slice(0,5));
+  }catch(e){console.error(e);}
+}
+
+function renderRecentBk(bks){
+  const el=document.getElementById('recent-bk-list');
+  if(!bks.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><h3>No bookings yet</h3><p>Bookings will appear here once drivers book your spots</p></div>`;return;}
+  el.innerHTML=bks.map(b=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(51,65,85,.4)">
+    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${b.spot_title}</div><div style="font-size:11px;color:var(--text3)">👤 ${b.driver_name} · ${formatDateTime(b.start_time)}</div></div>
+    <div style="text-align:right"><div style="font-size:13px;font-weight:600">₹${parseFloat(b.total_amount||0).toFixed(0)}</div>${statusBadge(b.status)}</div>
+  </div>`).join('');
+}
+
+async function loadSpots(){
+  showLoader('spots-list');
+  try{
+    const res=await API.spots.mySpots();allSpots=res.spots||[];
+    const el=document.getElementById('spots-list');
+    if(!allSpots.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">🏢</div><h3>No spots listed yet</h3><p>Add your first parking spot to start earning!</p></div>`;return;}
+    el.innerHTML=allSpots.map(s=>`
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${s.title}</div><div style="font-size:12px;color:var(--text3)">📍 ${s.address}, ${s.city}</div></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge ${s.is_active?'badge-green':'badge-gray'}">${s.is_active?'Active':'Inactive'}</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12px;margin-bottom:12px">
+          <div><div style="color:var(--text3)">Price/hr</div><div style="font-weight:600;color:var(--blue2)">₹${s.price_per_hour}</div></div>
+          <div><div style="color:var(--text3)">Total Slots</div><div style="font-weight:600">${s.total_slots}</div></div>
+          <div><div style="color:var(--text3)">Available</div><div style="font-weight:600;color:${s.available_slots>0?'var(--g2)':'var(--r2)'}">${s.available_slots}</div></div>
+          <div><div style="color:var(--text3)">Total Earned</div><div style="font-weight:600;color:var(--g2)">₹${Math.round(s.total_earnings||0).toLocaleString()}</div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="openSpotModal(${s.id})">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSpot(${s.id})">🗑 Delete</button>
+        </div>
+      </div>`).join('');
+  }catch(e){showEmpty('spots-list','😞','Error loading spots','Please try again');}
+}
+
+function openSpotModal(id=null){
+  editSpotId=id;
+  document.getElementById('spot-modal-title').textContent=id?'✏️ Edit Spot':'🏢 Add Parking Spot';
+  document.getElementById('spot-save-btn').textContent=id?'Update Spot':'Save Spot';
+  hideAlert('spot-alert');
+  if(id){
+    const s=allSpots.find(x=>x.id===id);if(!s)return;
+    document.getElementById('s-title').value=s.title||'';
+    document.getElementById('s-city').value=s.city||'';
+    document.getElementById('s-address').value=s.address||'';
+    document.getElementById('s-desc').value=s.description||'';
+    document.getElementById('s-price').value=s.price_per_hour||'';
+    document.getElementById('s-slots').value=s.total_slots||'';
+  }else{
+    ['s-title','s-city','s-address','s-desc','s-price','s-slots'].forEach(id=>document.getElementById(id).value='');
+  }
+  document.getElementById('spot-modal').style.display='flex';
+}
+function closeSpotModal(){document.getElementById('spot-modal').style.display='none';editSpotId=null;}
+
+async function saveSpot(){
+  const data={
+    title:   document.getElementById('s-title').value.trim(),
+    city:    document.getElementById('s-city').value.trim(),
+    address: document.getElementById('s-address').value.trim(),
+    description:document.getElementById('s-desc').value.trim(),
+    price_per_hour:parseFloat(document.getElementById('s-price').value),
+    total_slots:parseInt(document.getElementById('s-slots').value)||1,
+  };
+  if(!data.title||!data.address||!data.city||!data.price_per_hour){showAlert('Please fill all required fields','error','spot-alert');return;}
+  const btn=document.getElementById('spot-save-btn');btn.disabled=true;btn.textContent='Saving...';
+  try{
+    if(editSpotId){await API.spots.update(editSpotId,data);}else{await API.spots.create(data);}
+    closeSpotModal();showToast(editSpotId?'Spot updated!':'Spot added!','success');
+    await loadSpots();await loadDashboard();
+  }catch(e){showAlert(e.message||'Failed to save','error','spot-alert');}
+  btn.disabled=false;btn.textContent=editSpotId?'Update Spot':'Save Spot';
+}
+
+async function deleteSpot(id){
+  if(!confirm('Delete this spot? All related bookings may be affected.'))return;
+  try{await API.spots.delete(id);showToast('Spot deleted','info');await loadSpots();await loadDashboard();}
+  catch(e){showToast(e.message||'Delete failed','error');}
+}
+
+async function loadOwnerBookings(){
+  showLoader('owner-bk-list');
+  try{
+    const res=await API.bookings.spotBookings();allBk=res.bookings||[];
+    renderOwnerBk(allBk,currentBkFilter);
+  }catch(e){showEmpty('owner-bk-list','😞','Error loading bookings','Please try again');}
+}
+
+function filterOBk(btn,filter){
+  currentBkFilter=filter;
+  document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('btn-primary',b.dataset.filter===filter);b.classList.toggle('btn-outline',b.dataset.filter!==filter);});
+  renderOwnerBk(allBk,filter);
+}
+
+function renderOwnerBk(bks,filter=''){
+  const el=document.getElementById('owner-bk-list');
+  const data=filter?bks.filter(b=>b.status===filter):bks;
+  if(!data.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><h3>No bookings</h3><p>${filter?'No '+filter+' bookings found':'No bookings yet'}</p></div>`;return;}
+  el.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>Spot</th><th>Driver</th><th>Start</th><th>End</th><th>Hours</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody>`+
+  data.map(b=>`<tr>
+    <td style="font-weight:600">${b.spot_title}</td>
+    <td>${b.driver_name}<br><span style="font-size:10px;color:var(--text3)">${b.driver_phone||''}</span></td>
+    <td style="font-size:11px">${formatDateTime(b.start_time)}</td>
+    <td style="font-size:11px">${formatDateTime(b.end_time)}</td>
+    <td>${b.hours}h</td>
+    <td style="font-weight:600;color:var(--g2)">₹${parseFloat(b.total_amount||0).toFixed(0)}</td>
+    <td>${statusBadge(b.status)}</td>
+    <td>
+      ${b.status==='pending'?`<button class="btn btn-success btn-sm" onclick="updateBkStatus(${b.id},'active')">Activate</button>`:''}
+      ${b.status==='active'?`<button class="btn btn-outline btn-sm" onclick="updateBkStatus(${b.id},'completed')">Complete</button>`:''}
+    </td>
+  </tr>`).join('')+`</tbody></table></div>`;
+}
+
+async function updateBkStatus(id,status){
+  try{await API.bookings.updateStatus(id,status);showToast(`Booking ${status}!`,'success');await loadOwnerBookings();await loadDashboard();}
+  catch(e){showToast(e.message||'Failed','error');}
+}
+
+async function loadEarnings(){
+  try{
+    const res=await API.bookings.spotBookings();
+    const completed=res.bookings.filter(b=>b.status==='completed');
+    const total=completed.reduce((s,b)=>s+parseFloat(b.total_amount||0),0);
+    const now=new Date();const month=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const monthEarn=completed.filter(b=>b.start_time?.startsWith(month)).reduce((s,b)=>s+parseFloat(b.total_amount||0),0);
+    const avg=completed.length?total/completed.length:0;
+    document.getElementById('earn-total').textContent='₹'+Math.round(total).toLocaleString();
+    document.getElementById('earn-month').textContent='₹'+Math.round(monthEarn).toLocaleString();
+    document.getElementById('earn-avg').textContent='₹'+Math.round(avg).toLocaleString();
+    // by spot
+    const bySpot={};completed.forEach(b=>{if(!bySpot[b.spot_title])bySpot[b.spot_title]={total:0,count:0};bySpot[b.spot_title].total+=parseFloat(b.total_amount||0);bySpot[b.spot_title].count++;});
+    const rows=Object.entries(bySpot).map(([name,d])=>`<tr><td style="font-weight:600">${name}</td><td>${d.count}</td><td style="font-weight:700;color:var(--g2)">₹${Math.round(d.total).toLocaleString()}</td><td>₹${Math.round(d.total/d.count)}</td></tr>`).join('');
+    document.getElementById('earn-table').innerHTML=rows?`<table class="tbl"><thead><tr><th>Spot</th><th>Bookings</th><th>Total Earned</th><th>Avg/Booking</th></tr></thead><tbody>${rows}</tbody></table>`:`<div class="empty-state"><div class="empty-icon">💰</div><h3>No earnings yet</h3><p>Earnings appear when bookings are completed</p></div>`;
+  }catch(e){console.error(e);}
+}
+
+async function loadProfile(){
+  try{const res=await API.auth.me();const u=res.user;document.getElementById('p-name').value=u.name||'';document.getElementById('p-email').value=u.email||'';}catch{}
+}
+
+async function saveProfile(){
+  const name=document.getElementById('p-name').value.trim();if(!name)return;
+  try{
+    await API.auth.update({name});
+    const u=Auth.getUser();u.name=name;Auth.login(Auth.getToken(),u);fillUserInfo();
+    showAlert('Profile updated!','success','profile-ok');showToast('Saved ✅','success');
+  }catch(e){showToast(e.message||'Failed','error');}
+}
+</script>
+</body>
+</html>
